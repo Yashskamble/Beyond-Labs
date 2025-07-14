@@ -5,7 +5,6 @@ This is the submission for the **Senior Frontend Developer Assignment** at **Bey
 ## Live Demo
 
 > [View Deployed App on Vercel](https://beyond-labs-two.vercel.app/)  
-> [View Repository](https://github.com/Yashskamble/Beyond-Labs)
 
 ---
 
