@@ -4,15 +4,21 @@ import { useMemo, useState } from "react";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight, PlusIcon } from "lucide-react";
-import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/store/store";
 
 export default function WebsiteTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const data = useStore(state => state?.data);
-  const setSelectedWebsite = useStore(state => state?.setSelectedWebsite);
+  const data = useStore((state) => state?.data);
+  const setSelectedWebsite = useStore((state) => state?.setSelectedWebsite);
 
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -57,27 +63,24 @@ export default function WebsiteTable() {
         <PlusIcon size={10} /> Add Website
       </Button>
       <div className="container mx-auto p-4">
-        <Table className="min-w-ful  border-collapse shadow-md rounded-lg overflow-hidden">
+        <Table className="min-w-ful border-collapse shadow-md rounded-lg overflow-hidden">
           <TableHeader>
             <TableRow className="bg-[#613FDD05]">
-              <TableCell className="px-6 py-3 font-semibold text-[12px] leading-[16px] tracking-normal text-left text-[#0F0C1B99]">
-                Website
-              </TableCell>
-              <TableCell className="px-6 py-3 font-semibold text-[12px] leading-[16px] tracking-normal text-left text-[#0F0C1B99]">
-                Country
-              </TableCell>
-              <TableCell className="px-6 py-3 font-semibold text-[12px] leading-[16px] tracking-normal text-left text-[#0F0C1B99]">
-                Language
-              </TableCell>
-              <TableCell className="px-6 py-3 font-semibold text-[12px] leading-[16px] tracking-normal text-left text-[#0F0C1B99]">
-                Category
-              </TableCell>
-              <TableCell className="px-6 py-3 font-semibold text-[12px] leading-[16px] tracking-normal text-left text-[#0F0C1B99]">
-                Other Categories
-              </TableCell>
-              <TableCell className="px-6 py-3 font-semibold text-[12px] leading-[16px] tracking-normal text-left text-[#0F0C1B99]">
-                Grey Niches
-              </TableCell>
+              {[
+                "Website",
+                "Country",
+                "Language",
+                "Category",
+                "Other Categories",
+                "Grey Niches",
+              ].map((heading) => (
+                <TableCell
+                  key={heading}
+                  className="px-6 py-3 font-semibold text-[12px] leading-[16px] tracking-normal text-left text-[#0F0C1B99]"
+                >
+                  {heading}
+                </TableCell>
+              ))}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -98,14 +101,14 @@ export default function WebsiteTable() {
                 if (item.categories) {
                   mainCategory = item.categories[0];
                   otherCategories = item.categories.slice(1).join(", ");
-
                   if (item.categories.length > 5) {
                     otherCategories = `${item.categories
                       .slice(1, 6)
                       .join(
                         ", "
-                      )} <span class="text-[#613FDD] font-semibold">+${item.categories.length - 5
-                      }</span>`;
+                      )} <span class="text-[#613FDD] font-semibold">+${
+                      item.categories.length - 5
+                    }</span>`;
                   }
                 }
 
@@ -114,60 +117,24 @@ export default function WebsiteTable() {
                   typeof item.offers?.greyNicheOffer?.price === "number" &&
                   item.offers.greyNicheOffer.price > 0;
 
-                const isGambling =
-                  item.offers?.greyNicheOffer?.categories?.Gambling
-                    ?.guestPost &&
-                  item.offers?.greyNicheOffer?.categories?.Gambling
-                    ?.linkInsertion &&
-                  item.offers?.greyNicheOffer?.categories?.Gambling?.guestPost >
-                  0 &&
-                  item.offers?.greyNicheOffer?.categories?.Gambling
-                    ?.linkInsertion > 0;
-                const isCrypto =
-                  item.offers?.greyNicheOffer?.categories?.Crypto?.guestPost &&
-                  item.offers?.greyNicheOffer?.categories?.Crypto
-                    ?.linkInsertion &&
-                  item.offers?.greyNicheOffer?.categories?.Crypto?.guestPost >
-                  0 &&
-                  item.offers?.greyNicheOffer?.categories?.Crypto
-                    ?.linkInsertion > 0;
-                const isLoan =
-                  item.offers?.greyNicheOffer?.categories?.Loan?.guestPost &&
-                  item.offers?.greyNicheOffer?.categories?.Loan
-                    ?.linkInsertion &&
-                  item.offers?.greyNicheOffer?.categories?.Loan?.guestPost >
-                  0 &&
-                  item.offers?.greyNicheOffer?.categories?.Loan?.linkInsertion >
-                  0;
-                const isAdult =
-                  item.offers?.greyNicheOffer?.categories?.Adult?.guestPost &&
-                  item.offers?.greyNicheOffer?.categories?.Adult
-                    ?.linkInsertion &&
-                  item.offers?.greyNicheOffer?.categories?.Adult?.guestPost >
-                  0 &&
-                  item.offers?.greyNicheOffer?.categories?.Adult
-                    ?.linkInsertion > 0;
-                const isPharmacy =
-                  item.offers?.greyNicheOffer?.categories?.Pharmacy
-                    ?.guestPost &&
-                  item.offers?.greyNicheOffer?.categories?.Pharmacy
-                    ?.linkInsertion &&
-                  item.offers?.greyNicheOffer?.categories?.Pharmacy?.guestPost >
-                  0 &&
-                  item.offers?.greyNicheOffer?.categories?.Pharmacy
-                    ?.linkInsertion > 0;
-                const isCBD =
-                  item.offers?.greyNicheOffer?.categories?.CBD?.guestPost &&
-                  item.offers?.greyNicheOffer?.categories?.CBD?.linkInsertion &&
-                  item.offers?.greyNicheOffer?.categories?.CBD?.guestPost > 0 &&
-                  item.offers?.greyNicheOffer?.categories?.CBD?.linkInsertion >
-                  0;
+                const getNicheStatus = (niche) => {
+                  const data = item.offers?.greyNicheOffer?.categories?.[niche];
+                  return data?.guestPost > 0 && data?.linkInsertion > 0;
+                };
+
+                const isGambling = getNicheStatus("Gambling");
+                const isCrypto = getNicheStatus("Crypto");
+                const isLoan = getNicheStatus("Loan");
+                const isAdult = getNicheStatus("Adult");
+                const isPharmacy = getNicheStatus("Pharmacy");
+                const isCBD = getNicheStatus("CBD");
 
                 return (
                   <TableRow
                     key={index}
-                    className={`border-t ${index % 2 === 0 ? "bg-[#FEFEFF]" : "bg-[#613FDD05]"
-                      }`}
+                    className={`border-t ${
+                      index % 2 === 0 ? "bg-[#FEFEFF]" : "bg-[#613FDD05]"
+                    }`}
                     onClick={() => handleRowClick(item)}
                   >
                     <TableCell className="px-6 py-3 text-[#0F0C1B] font-normal text-[13px] leading-[18px] tracking-[0.25px]">
@@ -185,7 +152,7 @@ export default function WebsiteTable() {
                       </div>
                     </TableCell>
                     <TableCell className="px-6 py-3 text-[#0F0C1B] font-normal text-[13px] leading-[18px] tracking-[0.25px]">
-                      {item.language}
+                      {item.language.split("::")[0] || ""}
                     </TableCell>
                     <TableCell className="px-6 py-3 text-[#0F0C1B] font-normal text-[13px] leading-[18px] tracking-[0.25px]">
                       {mainCategory || "-"}
@@ -198,7 +165,7 @@ export default function WebsiteTable() {
                       />
                     </TableCell>
                     <TableCell className="px-6 py-3">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 text-[12px]">
                         {(isCrypto || isSamePrice) && (
                           <svg
                             width="16"
@@ -315,23 +282,21 @@ export default function WebsiteTable() {
             <Button
               variant="outline"
               disabled={currentPage === 1}
-              onClick={() => setCurrentPage((currentPage) => currentPage - 1)}
+              onClick={() => setCurrentPage((p) => p - 1)}
               className="px-4 py-2 text-sm text-gray-800 rounded-r-none"
             >
               <ArrowLeft size={10} /> Previous
             </Button>
 
-            {[...pageNumbers].map((page, index) => (
+            {pageNumbers.map((page, index) => (
               <Button
                 key={index}
                 variant="outline"
-                onClick={() => {
-                  if (typeof page === "number") {
-                    setCurrentPage(page);
-                  }
-                }}
+                onClick={() => setCurrentPage(page)}
                 disabled={currentPage === page}
-                className={`px-4 py-2 text-sm rounded-none  ${currentPage === page ? "bg-gray-200" : ""}`}
+                className={`px-4 py-2 text-sm rounded-none ${
+                  currentPage === page ? "bg-gray-200" : ""
+                }`}
               >
                 {page}
               </Button>
@@ -340,7 +305,7 @@ export default function WebsiteTable() {
             <Button
               variant="outline"
               disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((currentPage) => currentPage + 1)}
+              onClick={() => setCurrentPage((p) => p + 1)}
               className="px-4 py-2 text-sm text-gray-800 rounded-l-none"
             >
               Next <ArrowRight size={10} />

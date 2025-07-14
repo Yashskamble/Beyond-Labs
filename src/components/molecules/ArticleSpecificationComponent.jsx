@@ -1,29 +1,63 @@
 "use client";
 
 import { memo } from "react";
-
 import { Controller, useFormContext } from "react-hook-form";
 
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+
 import Heading from "../atoms/Heading";
 import RadioItem from "../atoms/RadioItem";
 
-function ArticleSpecification() {
+const NumberInput = ({ name, placeholder }) => {
   const {
-    formState: { errors },
     control,
+    formState: { errors },
   } = useFormContext();
 
+  const error = name.split(".").reduce((acc, key) => acc?.[key], errors);
+
+  return (
+    <div className="flex flex-col w-[95px]">
+      <Controller
+        name={name}
+        control={control}
+        render={({ field }) => (
+          <Input
+            {...field}
+            type="number"
+            placeholder={placeholder}
+            className={`h-[40px] text-[14px] ${
+              error?.message ? "border-red-500" : ""
+            }`}
+            value={field.value || ""}
+            onChange={(e) => {
+              const val = e.target.value;
+              const numeric = val === "" ? undefined : parseFloat(val);
+              field.onChange(numeric);
+            }}
+          />
+        )}
+      />
+      {error?.message && (
+        <span className="text-red-500 text-sm">{error.message}</span>
+      )}
+    </div>
+  );
+};
+
+function ArticleSpecificationComponent() {
   return (
     <div className="mt-10 mb-10 lg:w-[1024px] w-full">
       <Heading heading="Article specification" />
+
       <Card className="shadow-xs border-none my-6 p-6 flex flex-col gap-8 lg:gap-16 lg:flex-row">
         <div className="flex flex-col gap-6">
           <RadioItem
             question="Is writing of an article included in the offer?"
+            name="article.writingIncluded"
             option={[
               { value: "Yes" },
               {
@@ -31,12 +65,12 @@ function ArticleSpecification() {
                   "No, the advertiser (client) needs to provide the content",
               },
             ]}
-            name="article.writingIncluded"
           />
 
           <div className="flex flex-col gap-2">
             <RadioItem
               question="Number of words in the article"
+              name="article.wordLimit"
               option={[
                 { value: "Length of the article is not limited." },
                 {
@@ -44,66 +78,10 @@ function ArticleSpecification() {
                     "No, the advertiser (client) needs to provide the content",
                 },
               ]}
-              name="article.wordLimit"
             />
             <div className="flex gap-6 mx-4">
-              <div className="flex flex-col">
-                <Controller
-                  name="article.minWords"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      type="number"
-                      placeholder="Min"
-                      className={`w-[95px] h-[40px] text-[14px] ${errors.article?.minWords?.message &&
-
-                        "border-red-500"
-                        }`}
-                      value={field.value || ""}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        const numericValue =
-                          value === "" ? undefined : parseFloat(value);
-                        field.onChange(numericValue);
-                      }}
-                    />
-                  )}
-                />
-                {errors.article?.minWords?.message && (
-                  <span className="text-red-500 text-sm">
-                    {errors.article.minWords.message}
-                  </span>
-                )}
-              </div>
-              <div className="flex flex-col">
-                <Controller
-                  name="article.maxWords"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      type="number"
-                      placeholder="Max"
-                      className={`w-[95px] h-[40px] text-[14px] ${errors.article?.maxWords?.message &&
-                        "border-red-500"
-                        }`}
-                      value={field.value || ""}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        const numericValue =
-                          value === "" ? undefined : parseFloat(value);
-                        field.onChange(numericValue);
-                      }}
-                    />
-                  )}
-                />
-                {errors.article?.maxWords && (
-                  <span className="text-red-500 text-sm">
-                    {errors.article.maxWords.message}
-                  </span>
-                )}
-              </div>
+              <NumberInput name="article.minWords" placeholder="Min" />
+              <NumberInput name="article.maxWords" placeholder="Max" />
             </div>
           </div>
 
@@ -114,6 +92,7 @@ function ArticleSpecification() {
           />
 
           <RadioItem
+            name="article.linkType"
             question="Type of links allowed:"
             option={[
               { value: "Only brand links, URL, navigational, graphic links." },
@@ -121,12 +100,12 @@ function ArticleSpecification() {
               { value: "Also mixed links (partly exact match anchors)." },
               { value: "All links, including exact match anchors." },
             ]}
-            name="article.linkType"
           />
         </div>
 
         <div className="flex flex-col gap-6">
           <RadioItem
+            name="article.taggingPolicy"
             question="Tagging articles policy:"
             option={[
               { value: "We do not tag paid articles." },
@@ -135,74 +114,26 @@ function ArticleSpecification() {
               },
               { value: `We always tag articles: "Sponsored article".` },
             ]}
-            name="article.taggingPolicy"
           />
 
           <div className="flex flex-col gap-2">
             <RadioItem
+              name="article.advertiserLinkLimit"
               question="A number of links to the advertiser in the article:"
               option={[
                 { value: "We do not tag paid articles." },
                 { value: "A maximum number of links to the advertiser:" },
               ]}
-              name="article.advertiserLinkLimit"
             />
             <div className="flex gap-6 mx-4">
-              <div className="flex flex-col">
-                <Controller
-                  name="article.minAdvertiserLinks"
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      type="number"
-                      placeholder="Min"
-                      className={`w-[95px] h-[40px] text-[14px] ${errors.article?.minAdvertiserLinks?.message &&
-                        "border-red-500"
-                        }`}
-                      value={field.value || ""}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        const numericValue =
-                          value === "" ? undefined : parseFloat(value);
-                        field.onChange(numericValue);
-                      }}
-                    />
-                  )}
-                />
-                {errors.article?.minAdvertiserLinks && (
-                  <span className="text-red-500 text-sm">
-                    {errors.article.minAdvertiserLinks.message}
-                  </span>
-                )}
-              </div>
-              <div className="flex flex-col">
-                <Controller
-                  name="article.maxAdvertiserLinks"
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      type="number"
-                      placeholder="Max"
-                      className={`w-[95px] h-[40px] text-[14px] ${errors.article?.maxAdvertiserLinks?.message &&
-
-                        "border-red-500"
-                        }`}
-                      value={field.value || ""}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        const numericValue =
-                          value === "" ? undefined : parseFloat(value);
-                        field.onChange(numericValue);
-                      }}
-                    />
-                  )}
-                />
-                {errors.article?.maxAdvertiserLinks && (
-                  <span className="text-red-500 text-sm">
-                    {errors.article.maxAdvertiserLinks.message}
-                  </span>
-                )}
-              </div>
+              <NumberInput
+                name="article.minAdvertiserLinks"
+                placeholder="Min"
+              />
+              <NumberInput
+                name="article.maxAdvertiserLinks"
+                placeholder="Max"
+              />
             </div>
           </div>
 
@@ -223,7 +154,7 @@ function ArticleSpecification() {
 
           <div className="flex flex-col gap-2">
             <Label
-              htmlFor="question"
+              htmlFor="article.otherSpec"
               className="text-[#0F0C1B] text-[14px] font-[400] leading-[20px]"
             >
               Other content rules/specifications:
@@ -245,4 +176,4 @@ function ArticleSpecification() {
   );
 }
 
-export default memo(ArticleSpecification);
+export default memo(ArticleSpecificationComponent);

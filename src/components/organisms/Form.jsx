@@ -1,31 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { redirect } from "next/navigation";
-import { useForm, FormProvider } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod"
+import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/store/store";
 import { websiteFormSchema } from "@/schema/formSchema";
 import Precondition from "../molecules/PreconditionComponent";
 
-const CreateOffer = dynamic(() => import("@/components/molecules/CreateOfferComponent"), {
-  ssr: false,
-});
-
-const ArticleSpecification = dynamic(
-  () => import("@/components/molecules/ArticleSpecificationComponent"),
-  {
-    ssr: false,
-  }
+const CreateOffer = dynamic(() =>
+  import("@/components/molecules/CreateOfferComponent")
+);
+const ArticleSpecification = dynamic(() =>
+  import("@/components/molecules/ArticleSpecificationComponent")
+);
+const WebsiteDetail = dynamic(() =>
+  import("@/components/molecules/WebsiteDetailComponet")
 );
 
-const WebsiteDetail = dynamic(() => import("@/components/molecules/WebsiteDetailComponet"), {
-  ssr: false,
-});
-
-const formInitialValue = {
+const INITIAL_VALUES = {
   website: "",
   language: "",
   country: "",
@@ -35,10 +30,7 @@ const formInitialValue = {
   isOwner: false,
   preconditionAccepted: false,
   offers: {
-    normal: {
-      guestPost: 0,
-      linkInsertion: 0,
-    },
+    normal: { guestPost: 0, linkInsertion: 0 },
     greyNicheOffer: {
       samePrice: false,
       price: 0,
@@ -51,10 +43,7 @@ const formInitialValue = {
         Loan: { guestPost: 0, linkInsertion: 0 },
       },
     },
-    homepageOffer: {
-      price: 0,
-      description: "",
-    },
+    homepageOffer: { price: 0, description: "" },
   },
   article: {
     writingIncluded: "Yes",
@@ -73,92 +62,82 @@ const formInitialValue = {
   },
 };
 
-export default function Form() {
-  const { countries, addData, selectedWebsite, data, setSelectedWebsite, fetchCountries } = useStore();
-  const [isLoading, setIsLoading] = useState(true);
+export default function WebsiteForm() {
+  const {
+    countries,
+    addData,
+    selectedWebsite,
+    data,
+    setSelectedWebsite,
+    fetchCountries,
+  } = useStore();
 
-  const form = useForm({
+  const formMethods = useForm({
     resolver: zodResolver(websiteFormSchema),
-    defaultValues: formInitialValue,
+    defaultValues: INITIAL_VALUES,
     mode: "onSubmit",
   });
 
-  const {
-    handleSubmit,
-    formState: { errors },
-    watch,
-    setValue,
-    reset,
-    setFocus,
-  } = form;
+  const { watch, setValue, handleSubmit, reset, setFocus, formState } =
+    formMethods;
+  const { errors } = formState;
 
-  const formData = watch();
+  const draft = watch();
+  useEffect(() => {
+    localStorage.setItem("websiteFormData", JSON.stringify(draft));
+  }, [draft]);
+
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (countries.length === 0) {
-      fetchCountries();
-    }
-  }, [fetchCountries, countries]);
+    if (countries.length === 0) fetchCountries();
 
-  useEffect(() => {
+    const savedDraft = localStorage.getItem("websiteFormData");
+
     if (selectedWebsite) {
-      Object.keys(selectedWebsite).forEach((key) => {
-        setValue(key, selectedWebsite[key]);
-      });
-    } else {
-      const savedData = localStorage.getItem("websiteFormData");
-      if (savedData) {
-        const parsedData = JSON.parse(savedData);
-        Object.keys(parsedData).forEach((key) => {
-          if (parsedData[key] !== undefined) {
-            setValue(key, parsedData[key]);
-          }
-        });
-      }
+      Object.entries(selectedWebsite).forEach(([k, v]) => setValue(k, v));
+    } else if (savedDraft) {
+      const parsed = JSON.parse(savedDraft);
+      Object.entries(parsed).forEach(([k, v]) => setValue(k, v));
     }
-    setIsLoading(false);
-  }, [selectedWebsite, setValue]);
+
+    setLoading(false);
+  }, [countries.length, fetchCountries, selectedWebsite, setValue]);
+
+  const onSubmit = useCallback(
+    (payload) => {
+      if (selectedWebsite) {
+        const idx = data.findIndex(
+          (i) => i.website === selectedWebsite.website
+        );
+        if (idx !== -1) useStore.getState().data[idx] = payload;
+      } else {
+        addData(payload);
+      }
+
+      localStorage.removeItem("websiteFormData");
+      reset(INITIAL_VALUES);
+      setSelectedWebsite(null);
+      redirect("/");
+    },
+    [addData, data, reset, selectedWebsite, setSelectedWebsite]
+  );
 
   useEffect(() => {
-    if (!isLoading) {
-      localStorage.setItem("websiteFormData", JSON.stringify(formData));
-    }
-  }, [formData, isLoading]);
-
-  const onSubmit = (newData) => {
-    if (selectedWebsite) {
-      const index = data.findIndex(
-        (item) => item.website === selectedWebsite.website
-      );
-      useStore.getState().data[index] = newData;
-    } else {
-      addData(newData);
-    }
-    localStorage.removeItem("websiteFormData");
-    reset(formInitialValue);
-    setSelectedWebsite(null);
-    redirect("/");
-  };
-
-  useEffect(() => {
-    if (errors) {
-      const firstErrorField = Object.keys(errors)[0];
-      if (firstErrorField) {
-        setFocus(firstErrorField);
-      }
-    }
+    if (!errors) return;
+    const firstError = Object.keys(errors)[0];
+    if (firstError) setFocus(firstError);
   }, [errors, setFocus]);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  if (loading) return <div>Loading...</div>;
 
   return (
     <>
       <h2 className="mx-6 font-semibold text-[32px] leading-[44px] tracking-[-0.25px]">
         {selectedWebsite ? "Edit Website" : "Add a website"}
       </h2>
-      <FormProvider {...form}>
+
+      <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Precondition />
           {errors.preconditionAccepted?.message && (
@@ -166,11 +145,13 @@ export default function Form() {
               {errors.preconditionAccepted?.message}
             </span>
           )}
+
           <WebsiteDetail />
           <CreateOffer />
           <ArticleSpecification />
+
           <div className="flex justify-end">
-            <Button type="submit" className="bg-[#613FDD] text-[#fff]">
+            <Button type="submit" className="bg-[#613FDD] text-white">
               {selectedWebsite ? "Edit Website" : "Add a website"}
             </Button>
           </div>

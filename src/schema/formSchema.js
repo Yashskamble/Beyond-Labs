@@ -1,7 +1,86 @@
 import { z } from "zod";
 
+const articleSchema = z
+  .object({
+    writingIncluded: z.string(),
+    wordLimit: z.string(),
+    doFollowLinks: z.string(),
+    linkType: z.string(),
+    taggingPolicy: z.string(),
+    advertiserLinkLimit: z.string(),
+    otherLinksPolicy: z.string(),
+    otherSpec: z.string().optional(),
+    minWords: z.number().optional(),
+    maxWords: z.number().optional(),
+    minAdvertiserLinks: z.number().optional(),
+    maxAdvertiserLinks: z.number().optional(),
+  })
+  .refine(
+    (d) =>
+      d.wordLimit !==
+        "No, the advertiser (client) needs to provide the content" ||
+      d.minWords !== undefined,
+    {
+      message:
+        "Min words are required when the advertiser provides the content.",
+      path: ["minWords"],
+    }
+  )
+  .refine(
+    (d) =>
+      d.wordLimit !==
+        "No, the advertiser (client) needs to provide the content" ||
+      d.maxWords !== undefined,
+    {
+      message:
+        "Max words are required when the advertiser provides the content.",
+      path: ["maxWords"],
+    }
+  )
+  .refine(
+    (d) =>
+      d.advertiserLinkLimit !==
+        "A maximum number of links to the advertiser:" ||
+      d.minAdvertiserLinks !== undefined,
+    {
+      message: "Min number of links are required.",
+      path: ["minAdvertiserLinks"],
+    }
+  )
+  .refine(
+    (d) =>
+      d.advertiserLinkLimit !==
+        "A maximum number of links to the advertiser:" ||
+      d.maxAdvertiserLinks !== undefined,
+    {
+      message: "Max number of links are required.",
+      path: ["maxAdvertiserLinks"],
+    }
+  )
+  .refine(
+    (d) =>
+      d.minWords === undefined ||
+      d.maxWords === undefined ||
+      d.minWords <= d.maxWords,
+    {
+      message: "Min words must be less than or equal to max words.",
+      path: ["minWords"],
+    }
+  )
+  .refine(
+    (d) =>
+      d.minAdvertiserLinks === undefined ||
+      d.maxAdvertiserLinks === undefined ||
+      d.minAdvertiserLinks <= d.maxAdvertiserLinks,
+    {
+      message:
+        "Min advertiser links must be less than or equal to max advertiser links.",
+      path: ["minAdvertiserLinks"],
+    }
+  );
+
 export const websiteFormSchema = z.object({
-  website: z.string().url("Invalid URL").min(1, "Website is required"),
+  website: z.url("Invalid URL").min(1, "Website is required"),
   language: z.string().min(1, "Language is required"),
   country: z.string().min(1, "Country is required"),
   flag: z.string().min(1, "Flag is required"),
@@ -61,90 +140,5 @@ export const websiteFormSchema = z.object({
     }),
   }),
 
-  article: z
-    .object({
-      writingIncluded: z.string(),
-      wordLimit: z.string(),
-      doFollowLinks: z.string(),
-      linkType: z.string(),
-      taggingPolicy: z.string(),
-      advertiserLinkLimit: z.string(),
-      otherLinksPolicy: z.string(),
-      otherSpec: z.string().optional(),
-      minWords: z.number().optional(),
-      maxWords: z.number().optional(),
-      minAdvertiserLinks: z.number().optional(),
-      maxAdvertiserLinks: z.number().optional(),
-    })
-    .refine(
-      (data) => {
-        if (
-          data.wordLimit ===
-          "No, the advertiser (client) needs to provide the content"
-        ) {
-          if (data.minWords === undefined) {
-            return false;
-          }
-        }
-        return true;
-      },
-      {
-        message:
-          "Min words are required when the advertiser provides the content.",
-        path: ["minWords"],
-      }
-    )
-    .refine(
-      (data) => {
-        if (
-          data.wordLimit ===
-          "No, the advertiser (client) needs to provide the content"
-        ) {
-          if (data.maxWords === undefined) {
-            return false;
-          }
-        }
-        return true;
-      },
-      {
-        message:
-          "Max words are required when the advertiser provides the content.",
-        path: ["maxWords"],
-      }
-    )
-    .refine(
-      (data) => {
-        if (
-          data.advertiserLinkLimit ===
-          "A maximum number of links to the advertiser:"
-        ) {
-          if (data.minAdvertiserLinks === undefined) {
-            return false;
-          }
-        }
-        return true;
-      },
-      {
-        message: "Min number of links are required.",
-        path: ["minAdvertiserLinks"],
-      }
-    )
-    .refine(
-      (data) => {
-        if (
-          data.advertiserLinkLimit ===
-          "A maximum number of links to the advertiser:"
-        ) {
-          if (data.maxAdvertiserLinks === undefined) {
-            return false;
-          }
-        }
-        return true;
-      },
-      {
-        message: "Max number of links are required.",
-        path: ["maxAdvertiserLinks"],
-      }
-    ),
+  article: articleSchema,
 });
-

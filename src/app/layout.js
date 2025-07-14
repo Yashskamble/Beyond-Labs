@@ -3,24 +3,23 @@ import "./globals.css";
 import Header from "@/components/organisms/Header";
 
 const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
   subsets: ["latin"],
   weight: ["400", "500", "600"],
+  variable: "--font-dm-sans",
 });
 
 export const metadata = {
   title: "Backlink-Marketplace",
   description: "Backlink Marketplace Assignment",
   icons: {
-    icon: "/logo.png"
+    icon: "/logo.png",
   },
-
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${dmSans.variable} antialiased bg-[#FDFCFF]`}>
+      <body className={`${dmSans.variable} bg-[#FDFCFF] antialiased`}>
         <Header />
         {children}
       </body>
