@@ -28,7 +28,7 @@ export default function WebsiteTable() {
 
   const handleRowClick = (item) => {
     setSelectedWebsite(item);
-    redirect("/my-website/edit-website");
+    redirect("/edit-website");
   };
 
   function getDomainFromUrl(url) {
@@ -45,7 +45,7 @@ export default function WebsiteTable() {
     localStorage.removeItem("websiteFormData");
     setSelectedWebsite(null);
     setCurrentPage(1);
-    redirect("/my-website/add-website");
+    redirect("/add-website");
   };
 
   return (

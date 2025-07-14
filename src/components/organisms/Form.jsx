@@ -7,21 +7,21 @@ import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/store/store";
-import { websiteFormSchema } from "@/store/formSchema";
-import Precondition from "../molecules/Precondition";
+import { websiteFormSchema } from "@/schema/formSchema";
+import Precondition from "../molecules/PreconditionComponent";
 
-const CreateOffer = dynamic(() => import("@/components/molecules/CreateOffer"), {
+const CreateOffer = dynamic(() => import("@/components/molecules/CreateOfferComponent"), {
   ssr: false,
 });
 
 const ArticleSpecification = dynamic(
-  () => import("@/components/molecules/ArticleSpecification"),
+  () => import("@/components/molecules/ArticleSpecificationComponent"),
   {
     ssr: false,
   }
 );
 
-const WebsiteDetail = dynamic(() => import("@/components/molecules/WebsiteDetail"), {
+const WebsiteDetail = dynamic(() => import("@/components/molecules/WebsiteDetailComponet"), {
   ssr: false,
 });
 
@@ -137,7 +137,7 @@ export default function Form() {
     localStorage.removeItem("websiteFormData");
     reset(formInitialValue);
     setSelectedWebsite(null);
-    redirect("/my-website");
+    redirect("/");
   };
 
   useEffect(() => {
